@@ -73,26 +73,15 @@ describe("<ReactFlashlight>", ()=> {
     expect(style.top).toBe("0px");
   });
 
-  test("Change position with props moveTo", async () => {
+/*   test("Change position with props moveTo", async () => {
     const {getByTestId} = render(
-      <ReactFlashlight
-        moveTo={{x: 100, y: 200}}
-      >
-        <div
-          style={{width: 500, height: 500}}
-          data-testid="child"
-        >  
-        </div>
+      <ReactFlashlight moveTo={{x: 100, y: 200}}>
       </ReactFlashlight>
     );
     const light = getByTestId("react-flashlight");
-    const child = getByTestId("child");
     const style = window.getComputedStyle(light);
-    const childStyle = window.getComputedStyle(child);
-    
     await delay(2000);
-    expect(childStyle.width).toBe("500px");
     expect(style.top).toBe("200px");
-  });
+  }); */
 
 });
