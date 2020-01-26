@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+<style>
+  body {
+    background-image: url("bg.png");
+    overflow: hidden;
+  }
+  .light {
+    position: relative;
+    top: -100px;
+    left: -100px;
+    border: 1px solid red;
+    background: radial-gradient(transparent 0%, rgba(0, 0, 0, 1) 1%, rgba(0, 0, 0, 1) 80%);
+    transition: background 1000ms;
+    cursor: none;
+  }
+
+  .square {
+    position: absolute;
+    background-color: red;
+  }
+
+  .container {
+    border: 1px solid blue;
+    height: 200px;
+    width: 200px;
+    overflow: hidden;
+  }
+
+</style>
+<script>
+
+  let light;
+  let background
+
+  window.onload = () => {
+    const light = document.querySelector(".light");
+    const background = document.querySelector(".background");
+    let lightCSS = "radial-gradient(transparent 0%, rgba(0, 0, 0, 1) 1%, rgba(0, 0, 0, 1) 80%)";
+    let size = 1;
+    light.style.width = window.innerWidth * 10 + "px";
+    light.style.height = window.innerWidth * 10 + "px";
+
+    document.addEventListener("mousemove", (e)=>{
+      var lightStyle = window.getComputedStyle(light, null);
+      light.style.top = e.clientY - parseInt(lightStyle.height) / 2 + "px";
+      light.style.left = e.clientX - parseInt(lightStyle.width) / 2 + "px";
+    });
+
+    window.addEventListener('wheel', function(event) {
+      if (event.deltaY < 0) {
+        console.log('scrolling up');
+        size += 0.5;
+      } else if (event.deltaY > 0) {
+        console.log('scrolling down');
+        size -= 0.5;
+      }
+      light.style.background = "radial-gradient(transparent 0%, rgba(0, 0, 0, 1) " + size + "%, rgba(0, 0, 0, 1) " + (100 - size) + "%)";
+    });
+
+  }
+
+</script>
+
+</head>
+<body>
+
+  <div class="container"><div class="light"></div></div>
+
+
+</body>
+</html>

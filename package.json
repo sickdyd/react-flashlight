@@ -1,0 +1,58 @@
+{
+  "name": "react-flashlight",
+  "author": "Reale Roberto Josef Antonio",
+  "license": "MIT",
+  "version": "1.0.5",
+  "description": "A search box for React",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest --verbose --watch-all",
+    "prepublishOnly": "babel ./src --out-dir ./dist -s inline --ignore **/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sickdyd/react-search-autocomplete.git"
+  },
+  "keywords": [
+    "search",
+    "searchbox",
+    "autocomplete",
+    "suggestion",
+    "suggestions",
+    "google",
+    "autosuggest",
+    "autocomplete",
+    "auto suggest",
+    "auto complete",
+    "react autosuggest",
+    "react autocomplete",
+    "react auto suggest",
+    "react auto complete"
+  ],
+  "bugs": {
+    "url": "https://github.com/sickdyd/react-search-autocomplete/issues"
+  },
+  "homepage": "https://github.com/sickdyd/react-search-autocomplete#readme",
+  "dependencies": {
+    "styled-components": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^16.12.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/polyfill": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@testing-library/jest-dom": "^5.0.2",
+    "@testing-library/react": "^9.4.0",
+    "jest": "^25.1.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.12.0",
+    "react-test-renderer": "^16.12.0"
+  },
+  "files": [
+    "dist/*"
+  ]
+}
