@@ -99,15 +99,15 @@ export default function ReactFlashlight(props) {
     resizeObserver.observe(container);
 
     window.addEventListener("resize", resizeLight);
-    (enableMouse && contain) && container.addEventListener("mousemove", handleMouseMove);
-    (enableMouse && !contain) && window.addEventListener("mousemove", handleMouseMove);
-    wheelResize && container.addEventListener("wheel", handleWheel, {passive: false});
+    if (enableMouse && contain) container.addEventListener("mousemove", handleMouseMove);
+    if (enableMouse && !contain) window.addEventListener("mousemove", handleMouseMove);
+    if (wheelResize) container.addEventListener("wheel", handleWheel, {passive: false});
 
     // Cleanup
     return ()=>{
-      wheelResize && container.removeEventListener("mousemove", handleMouseMove);
-      (enableMouse && contain) && container.removeEventListener("wheel", handleWheel);
-      (enableMouse && !contain) && window.removeEventListener("wheel", handleWheel);
+      if (wheelResize) container.removeEventListener("mousemove", handleMouseMove);
+      if (enableMouse && contain) container.removeEventListener("wheel", handleWheel);
+      if (enableMouse && !contain) window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("resize", resizeLight)
       resizeObserver.unobserve(container);
       resizeObserver.disconnect();
