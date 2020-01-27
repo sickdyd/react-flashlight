@@ -34,10 +34,12 @@
   },
   "homepage": "https://github.com/sickdyd/react-search-autocomplete#readme",
   "dependencies": {
-    "styled-components": "^5.0.0"
+    "styled-components": "^5.0.0",
+    "resize-observer-polyfill": "^1.5.1"
   },
   "peerDependencies": {
-    "react": "^16.12.0"
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",
@@ -48,7 +50,7 @@
     "@testing-library/jest-dom": "^5.0.2",
     "@testing-library/react": "^9.4.0",
     "jest": "^25.1.0",
-    "react": "^16.11.0",
+    "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-test-renderer": "^16.12.0"
   },

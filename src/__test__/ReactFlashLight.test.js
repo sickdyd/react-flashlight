@@ -14,7 +14,7 @@ wheelResize, */
 
 afterEach(cleanup);
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+//const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe("<ReactFlashlight>", ()=> { 
 
@@ -24,13 +24,13 @@ describe("<ReactFlashlight>", ()=> {
     expect(light).toBeInTheDocument();
   });
 
-  test("Renders children", () => {
+  test("Renders component children", () => {
     const {getByTestId} = render(<ReactFlashlight><div data-testid="child"></div></ReactFlashlight>);
     const child = getByTestId("child");
     expect(child).toBeInTheDocument();
   });
 
-  test("Hides cursor by default", () => {
+  test("If showCursor is false hide cursor (default)", () => {
     const {getByTestId} = render(<ReactFlashlight />);
     const light = getByTestId("react-flashlight");
     const style = window.getComputedStyle(light);
@@ -38,14 +38,14 @@ describe("<ReactFlashlight>", ()=> {
     expect(style.cursor).toBe("none");
   });
 
-  test("Shows cursor if showCursor is true", () => {
+  test("If showCursor is true show cursor", () => {
     const {getByTestId} = render(<ReactFlashlight showCursor={true} />);
     const light = getByTestId("react-flashlight");
     const style = window.getComputedStyle(light);
     expect(style.cursor).toBe("default");
   });
 
-  test("By default change position on mouseMove", () => {
+  test("If enableMouse is true move the light on mouseMove (default)", () => {
     const {getByTestId} = render(
       <ReactFlashlight>
         <div data-testid="child"></div>
@@ -73,15 +73,52 @@ describe("<ReactFlashlight>", ()=> {
     expect(style.top).toBe("0px");
   });
 
-/*   test("Change position with props moveTo", async () => {
+  test("Change light position with props moveTo", () => {
     const {getByTestId} = render(
       <ReactFlashlight moveTo={{x: 100, y: 200}}>
-      </ReactFlashlight>
+        <div style={{width: 500, height: 500}}></div>
+      </ReactFlashlight>,
     );
     const light = getByTestId("react-flashlight");
     const style = window.getComputedStyle(light);
-    await delay(2000);
     expect(style.top).toBe("200px");
+  });
+
+  test("Check for speed default prop", () => {
+    const {getByTestId} = render(
+      <ReactFlashlight moveTo={{x: 100, y: 200}} />
+    );
+    const light = getByTestId("react-flashlight");
+    expect(light.style.transition).toContain("1000ms");
+  });
+
+  test("Change speed prop to 2000ms", () => {
+    const {getByTestId} = render(
+      <ReactFlashlight speed={2000} moveTo={{x: 100, y: 200}} />
+    );
+    const light = getByTestId("react-flashlight");
+    expect(light.style.transition).toContain("2000ms");
+  });
+
+/*   test("Do not change size on wheel event by default", () => {
+    const {getByTestId} = render(
+      <ReactFlashlight moveTo={{x: 100, y: 200}}>
+        <div style={{width: 500, height: 500}}></div>
+      </ReactFlashlight>,
+    );
+    const light = getByTestId("react-flashlight");
+    expect(light).toHaveStyle("background: radial-gradient(transparent 0%, rgba(0, 0, 0, 0.9) 10%, rgba(0, 0, 0, 1) 80%)")
+
+    fireEvent.wheel(light, {
+      bubbles: true,
+      cancelable: false,
+      deltaY: 30,
+      x: 30,
+      y: 30,
+      deltaMode: WheelEvent.DOM_DELTA_LINE
+    });
+    
+    expect(light).toHaveStyle("background: radial-gradient(transparent 0%, rgba(0, 0, 0, 0.9) 10%, rgba(0, 0, 0, 1) 80%)");
   }); */
 
 });

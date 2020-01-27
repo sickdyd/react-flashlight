@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import ResizeObserver from 'resize-observer-polyfill';
 
 export default function ReactFlashlight(props) {
 
@@ -36,14 +37,18 @@ export default function ReactFlashlight(props) {
     container.style.overflow = "hidden";
     container.style.position = "relative";
 
-    const containerStyle = container.getBoundingClientRect();
+    function resizeLight() {
+      const containerStyle = container.getBoundingClientRect();
 
-    const maskSize = parseInt(containerStyle.width) > parseInt(containerStyle.height)
-      ? parseInt(containerStyle.width)
-      : parseInt(containerStyle.height);
+      const maskSize = parseInt(containerStyle.width) > parseInt(containerStyle.height)
+        ? parseInt(containerStyle.width)
+        : parseInt(containerStyle.height);
+  
+      light.style.width = maskSize * 2 + "px";
+      light.style.height = maskSize * 2 + "px";
+    }
 
-    light.style.width = maskSize * 2 + "px";
-    light.style.height = maskSize * 2 + "px";
+    resizeLight();
 
     const lightStyle = window.getComputedStyle(light, null);
 
@@ -60,20 +65,30 @@ export default function ReactFlashlight(props) {
 
     function handleWheel(e) {
       e.preventDefault();
-      if (event.deltaY < 0) {
+      console.log(size)
+      if (e.deltaY < 0) {
         size += 1;
-      } else if (event.deltaY > 0) {
+      } else if (e.deltaY > 0) {
         if (size > 0) size -= 1;
       }
+      console.log(size)
       light.style.background = "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") " + (100 - size) + "%)";
     }
+
+    const resizeObserver = new ResizeObserver(entries => {
+      resizeLight();
+    });
+
+    resizeObserver.observe(container);
 
     enableMouse && container.addEventListener("mousemove", handleMouseMove);
     wheelResize && container.addEventListener("wheel", handleWheel);
 
     return ()=>{
       wheelResize && container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("wheel", handleWheel)
+      container.removeEventListener("wheel", handleWheel);
+      resizeObserver.unobserve(container);
+      resizeObserver.disconnect();
     }
 
   }, []);
@@ -87,10 +102,10 @@ export default function ReactFlashlight(props) {
       light.style.transition = "all ease-in-out " + speed + "ms";
   
       const lightStyle = window.getComputedStyle(light, null);
-      const containerStyle = container.getBoundingClientRect();
-  
-      if (moveTo.x > containerStyle.width) moveTo.x = containerStyle.width;
-      if (moveTo.y > containerStyle.height) moveTo.y = containerStyle.height;
+      const containerStyle = window.getComputedStyle(container, null); //container.getBoundingClientRect();
+
+      if (moveTo.x > parseInt(containerStyle.width)) moveTo.x = parseInt(containerStyle.width);
+      if (moveTo.y > parseInt(containerStyle.height)) moveTo.y = parseInt(containerStyle.height);
       if (moveTo.x < 0) moveTo.x = 0;
       if (moveTo.y < 0) moveTo.y = 0;
   
@@ -143,4 +158,4 @@ ReactFlashlight.defaultProps = {
   speed: 1000,
   wheelResize: false,
   darkness: 0.9,
-}
+} 
