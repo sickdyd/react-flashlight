@@ -2,7 +2,7 @@
   "name": "react-flashlight",
   "author": "Reale Roberto Josef Antonio",
   "license": "MIT",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A flashlight effect for React",
   "main": "dist/index.js",
   "scripts": {

@@ -8,9 +8,10 @@ import ResizeObserver from 'resize-observer-polyfill';
  * @param {bool} showCursor If true, shows the cursor
  * @param {number} initialSize the initial size of the light
  * @param {object} initialPosition An object {x: value, y: value} defining the initial position
- * @param {bool} enableMouse If true, the user can control the light with its mouse
  * @param {object} moveTo An object {x: value, y: value} defining the location to where the light will be moved
  * @param {number} speed Defines the transition speed of the movement of the light
+ * @param {bool} contain If true, the light can't move outside of the container
+ * @param {bool} enableMouse If true, the user can control the light with its mouse
  * @param {bool} wheelResize If true, allows the user to resize the light with the mouse wheel
  * @param {number} darkness Defines how dark is the "room"
  */
@@ -22,9 +23,10 @@ export default function ReactFlashlight(props) {
     showCursor,
     initialSize,
     initialPosition,
-    enableMouse,
     moveTo,
     speed,
+    contain,
+    enableMouse,
     wheelResize,
     darkness,
   } = props;
@@ -34,13 +36,17 @@ export default function ReactFlashlight(props) {
     top: 0,
     left: 0,
     // To control the size of the light, simply use a percentage on the background creating the effect - init with initialSize
-    background: "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + initialSize + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)",
+    background: returnBackground(darkness, initialSize),
     transition: "none",
     pointerEvents: "none",
   }
 
   const lightRef = React.useRef();
   const containerRef = React.useRef();
+
+  function returnBackground(darkness, size) {
+    return "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "px, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)"
+  }
 
   /**
    * Here I add event handlers for wheel, mouseMove and resize
@@ -56,25 +62,17 @@ export default function ReactFlashlight(props) {
     container.style.position = "relative";
     container.style.cursor = showCursor ? "default" : "none";
 
-    // This function resizes the light, and it's called when the component mount and if the window resizes
+    // Resizes the light
 
     function resizeLight() {
-      const containerStyle = container.getBoundingClientRect();
+      const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
 
-      const maskSize = parseInt(containerStyle.width) > parseInt(containerStyle.height)
-        ? parseInt(containerStyle.width)
-        : parseInt(containerStyle.height);
-  
       light.style.width = maskSize * 2 + "px";
       light.style.height = maskSize * 2 + "px";
+  
+      light.style.left = initialPosition.x - maskSize + "px";
+      light.style.top = initialPosition.y - maskSize + "px";
     }
-
-    resizeLight();
-
-    const lightStyle = window.getComputedStyle(light, null);
-
-    light.style.left = initialPosition.x - parseInt(lightStyle.width) / 2 + "px";
-    light.style.top = initialPosition.y - parseInt(lightStyle.height) / 2 + "px";
 
     function handleMouseMove(e) {
       const lightStyle = window.getComputedStyle(light, null);
@@ -87,30 +85,30 @@ export default function ReactFlashlight(props) {
     function handleWheel(e) {
       e.preventDefault();
       if (e.deltaY < 0) {
-        size += 1;
+        size += 10;
       } else if (e.deltaY > 0) {
-        if (size > 0) size -= 1;
+        if (size > 0) size -= 10;
       }
-      light.style.background = "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") " + (100 - size) + "%)";
+      light.style.background = returnBackground(darkness, size);
     }
 
-    const resizeObserver = new ResizeObserver(entries => {
-      resizeLight();
-      const light = lightRef.current;
-      light.style.transition = "none";
-      light.style.left = initialPosition.x;
-      light.style.top = initialPosition.y;
-    });
+    resizeLight();
+
+    const resizeObserver = new ResizeObserver(()=>resizeLight());
 
     resizeObserver.observe(container);
 
-    enableMouse && container.addEventListener("mousemove", handleMouseMove);
-    wheelResize && container.addEventListener("wheel", handleWheel);
+    window.addEventListener("resize", resizeLight);
+    (enableMouse && contain) && container.addEventListener("mousemove", handleMouseMove);
+    (enableMouse && !contain) && window.addEventListener("mousemove", handleMouseMove);
+    wheelResize && container.addEventListener("wheel", handleWheel, {passive: false});
 
     // Cleanup
     return ()=>{
       wheelResize && container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("wheel", handleWheel);
+      (enableMouse && contain) && container.removeEventListener("wheel", handleWheel);
+      (enableMouse && !contain) && window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("resize", resizeLight)
       resizeObserver.unobserve(container);
       resizeObserver.disconnect();
     }
@@ -169,9 +167,10 @@ ReactFlashlight.propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
   }),
-  enableMouse: PropTypes.bool,
   moveTo: PropTypes.object,
   speed: PropTypes.number,
+  contain: PropTypes.bool,
+  enableMouse: PropTypes.bool,
   wheelResize: PropTypes.bool,
   darkness: PropTypes.number,
 }
@@ -179,11 +178,12 @@ ReactFlashlight.propTypes = {
 ReactFlashlight.defaultProps = {
   children: <div></div>,
   showCursor: false,
-  initialSize: 10,
+  initialSize: 50,
   initialPosition: {x: 0, y: 0},
-  enableMouse: true,
   moveTo: null,
   speed: 1000,
+  contain: true,
+  enableMouse: true,
   wheelResize: true,
   darkness: 0.9,
 } 
