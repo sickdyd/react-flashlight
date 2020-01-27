@@ -35,8 +35,8 @@ export default function ReactFlashlight(props) {
     left: 0,
     // To control the size of the light, simply use a percentage on the background creating the effect - init with initialSize
     background: "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + initialSize + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)",
-    cursor: showCursor ? "default" : "none",
-    transition: "none"
+    transition: "none",
+    pointerEvents: "none",
   }
 
   const lightRef = React.useRef();
@@ -54,6 +54,7 @@ export default function ReactFlashlight(props) {
     const container = containerRef.current;
     container.style.overflow = "hidden";
     container.style.position = "relative";
+    container.style.cursor = showCursor ? "default" : "none";
 
     // This function resizes the light, and it's called when the component mount and if the window resizes
 
@@ -95,6 +96,10 @@ export default function ReactFlashlight(props) {
 
     const resizeObserver = new ResizeObserver(entries => {
       resizeLight();
+      const light = lightRef.current;
+      light.style.transition = "none";
+      light.style.left = initialPosition.x;
+      light.style.top = initialPosition.y;
     });
 
     resizeObserver.observe(container);
@@ -132,8 +137,8 @@ export default function ReactFlashlight(props) {
       if (moveTo.x < 0) moveTo.x = 0;
       if (moveTo.y < 0) moveTo.y = 0;
   
-      light.style.top = moveTo.y - parseInt(lightStyle.height) / 2 + "px";
       light.style.left = moveTo.x - parseInt(lightStyle.width) / 2 + "px";
+      light.style.top = moveTo.y - parseInt(lightStyle.height) / 2 + "px";
     }
   }, [moveTo])
 
@@ -151,7 +156,7 @@ export default function ReactFlashlight(props) {
               />
               {child.props.children}
             </>
-        })
+        }) 
     )
   )
 }
@@ -179,6 +184,6 @@ ReactFlashlight.defaultProps = {
   enableMouse: true,
   moveTo: null,
   speed: 1000,
-  wheelResize: false,
+  wheelResize: true,
   darkness: 0.9,
 } 

@@ -4,17 +4,7 @@ import { fireEvent, cleanup, render } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import ReactFlashlight from "../ReactFlashlight";
 
-/* children,
-showCursor,
-initialSize,
-enableMouse,
-moveTo,
-speed,
-wheelResize, */
-
 afterEach(cleanup);
-
-//const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe("<ReactFlashlight>", ()=> { 
 
@@ -31,17 +21,22 @@ describe("<ReactFlashlight>", ()=> {
   });
 
   test("If showCursor is false hide cursor (default)", () => {
-    const {getByTestId} = render(<ReactFlashlight />);
-    const light = getByTestId("react-flashlight");
-    const style = window.getComputedStyle(light);
-    expect(light).toBeInTheDocument();
+    const {getByTestId} = render(
+      <ReactFlashlight>
+        <div data-testid="child"></div>
+      </ReactFlashlight>);
+    const child = getByTestId("child");
+    const style = window.getComputedStyle(child);
     expect(style.cursor).toBe("none");
   });
 
   test("If showCursor is true show cursor", () => {
-    const {getByTestId} = render(<ReactFlashlight showCursor={true} />);
-    const light = getByTestId("react-flashlight");
-    const style = window.getComputedStyle(light);
+    const {getByTestId} = render(
+      <ReactFlashlight showCursor={true}>
+        <div data-testid="child"></div>
+      </ReactFlashlight>);
+    const child = getByTestId("child");
+    const style = window.getComputedStyle(child);
     expect(style.cursor).toBe("default");
   });
 
@@ -99,26 +94,5 @@ describe("<ReactFlashlight>", ()=> {
     const light = getByTestId("react-flashlight");
     expect(light.style.transition).toContain("2000ms");
   });
-
-/*   test("Do not change size on wheel event by default", () => {
-    const {getByTestId} = render(
-      <ReactFlashlight moveTo={{x: 100, y: 200}}>
-        <div style={{width: 500, height: 500}}></div>
-      </ReactFlashlight>,
-    );
-    const light = getByTestId("react-flashlight");
-    expect(light).toHaveStyle("background: radial-gradient(transparent 0%, rgba(0, 0, 0, 0.9) 10%, rgba(0, 0, 0, 1) 80%)")
-
-    fireEvent.wheel(light, {
-      bubbles: true,
-      cancelable: false,
-      deltaY: 30,
-      x: 30,
-      y: 30,
-      deltaMode: WheelEvent.DOM_DELTA_LINE
-    });
-    
-    expect(light).toHaveStyle("background: radial-gradient(transparent 0%, rgba(0, 0, 0, 0.9) 10%, rgba(0, 0, 0, 1) 80%)");
-  }); */
 
 });

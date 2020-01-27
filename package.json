@@ -2,8 +2,8 @@
   "name": "react-flashlight",
   "author": "Reale Roberto Josef Antonio",
   "license": "MIT",
-  "version": "1.0.5",
-  "description": "A search box for React",
+  "version": "1.0.0",
+  "description": "A flashlight effect for React",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --verbose --watch-all",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sickdyd/react-search-autocomplete.git"
+    "url": "git+https://github.com/sickdyd/react-flashlight.git"
   },
   "keywords": [
     "search",
@@ -30,9 +30,9 @@
     "react auto complete"
   ],
   "bugs": {
-    "url": "https://github.com/sickdyd/react-search-autocomplete/issues"
+    "url": "https://github.com/sickdyd/react-flashlight/issues"
   },
-  "homepage": "https://github.com/sickdyd/react-search-autocomplete#readme",
+  "homepage": "https://github.com/sickdyd/react-flashlight#readme",
   "dependencies": {
     "styled-components": "^5.0.0",
     "resize-observer-polyfill": "^1.5.1"
