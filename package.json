@@ -2,11 +2,11 @@
   "name": "react-flashlight",
   "author": "Reale Roberto Josef Antonio",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "A flashlight effect for React",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest --verbose --watch-all",
+    "test": "jest --verbose",
     "prepublishOnly": "babel ./src --out-dir ./dist -s inline --ignore **/*.test.js"
   },
   "repository": {
@@ -14,27 +14,21 @@
     "url": "git+https://github.com/sickdyd/react-flashlight.git"
   },
   "keywords": [
-    "search",
-    "searchbox",
-    "autocomplete",
-    "suggestion",
-    "suggestions",
-    "google",
-    "autosuggest",
-    "autocomplete",
-    "auto suggest",
-    "auto complete",
-    "react autosuggest",
-    "react autocomplete",
-    "react auto suggest",
-    "react auto complete"
+    "flashlight",
+    "light",
+    "torch",
+    "spotlight",
+    "effect",
+    "highlight",
+    "flash",
+    "candle",
+    "graphics"
   ],
   "bugs": {
     "url": "https://github.com/sickdyd/react-flashlight/issues"
   },
   "homepage": "https://github.com/sickdyd/react-flashlight#readme",
   "dependencies": {
-    "styled-components": "^5.0.0",
     "resize-observer-polyfill": "^1.5.1"
   },
   "peerDependencies": {

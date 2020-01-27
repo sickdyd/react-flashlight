@@ -6,7 +6,7 @@ A `<ReactFlashlight>` adds a flashlight effect to an element.
 
 [Click here to see a demo](https://sickdyd.github.io/react-flashlight-demo/).
 
-[Demo source](https://github.com/sickdyd/react-flashlight-demo).
+[Demo source](https://github.com/sickdyd/react-flashlight-demo/blob/master/src/App.js).
 
 ### Installing
 
