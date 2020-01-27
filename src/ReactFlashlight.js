@@ -2,6 +2,19 @@ import React from "react";
 import PropTypes from "prop-types";
 import ResizeObserver from 'resize-observer-polyfill';
 
+/**
+ * 
+ * @param {HTMLElement} children The component's children
+ * @param {bool} showCursor If true, shows the cursor
+ * @param {number} initialSize the initial size of the light
+ * @param {object} initialPosition An object {x: value, y: value} defining the initial position
+ * @param {bool} enableMouse If true, the user can control the light with its mouse
+ * @param {object} moveTo An object {x: value, y: value} defining the location to where the light will be moved
+ * @param {number} speed Defines the transition speed of the movement of the light
+ * @param {bool} wheelResize If true, allows the user to resize the light with the mouse wheel
+ * @param {number} darkness Defines how dark is the "room"
+ */
+
 export default function ReactFlashlight(props) {
 
   const {
@@ -20,6 +33,7 @@ export default function ReactFlashlight(props) {
     position: "absolute",
     top: 0,
     left: 0,
+    // To control the size of the light, simply use a percentage on the background creating the effect - init with initialSize
     background: "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + initialSize + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)",
     cursor: showCursor ? "default" : "none",
     transition: "none"
@@ -27,6 +41,10 @@ export default function ReactFlashlight(props) {
 
   const lightRef = React.useRef();
   const containerRef = React.useRef();
+
+  /**
+   * Here I add event handlers for wheel, mouseMove and resize
+   */
 
   React.useEffect(()=>{
 
@@ -36,6 +54,8 @@ export default function ReactFlashlight(props) {
     const container = containerRef.current;
     container.style.overflow = "hidden";
     container.style.position = "relative";
+
+    // This function resizes the light, and it's called when the component mount and if the window resizes
 
     function resizeLight() {
       const containerStyle = container.getBoundingClientRect();
@@ -65,13 +85,11 @@ export default function ReactFlashlight(props) {
 
     function handleWheel(e) {
       e.preventDefault();
-      console.log(size)
       if (e.deltaY < 0) {
         size += 1;
       } else if (e.deltaY > 0) {
         if (size > 0) size -= 1;
       }
-      console.log(size)
       light.style.background = "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "%, rgba(0, 0, 0, " + (darkness + 0.1) + ") " + (100 - size) + "%)";
     }
 
@@ -84,6 +102,7 @@ export default function ReactFlashlight(props) {
     enableMouse && container.addEventListener("mousemove", handleMouseMove);
     wheelResize && container.addEventListener("wheel", handleWheel);
 
+    // Cleanup
     return ()=>{
       wheelResize && container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("wheel", handleWheel);
@@ -92,6 +111,10 @@ export default function ReactFlashlight(props) {
     }
 
   }, []);
+
+  /**
+   * This is executed when moveTo props change
+   */
 
   React.useEffect(()=>{
 
