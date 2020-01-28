@@ -6,28 +6,26 @@ import ResizeObserver from 'resize-observer-polyfill';
  * 
  * @param {HTMLElement} children The component's children
  * @param {bool} showCursor If true, shows the cursor
- * @param {number} initialSize the initial size of the light
+ * @param {number} size the initial size of the light
  * @param {object} initialPosition An object {x: value, y: value} defining the initial position
  * @param {object} moveTo An object {x: value, y: value} defining the location to where the light will be moved
  * @param {number} speed Defines the transition speed of the movement of the light
  * @param {bool} contain If true, the light can't move outside of the container
  * @param {bool} enableMouse If true, the user can control the light with its mouse
- * @param {bool} wheelResize If true, allows the user to resize the light with the mouse wheel
  * @param {number} darkness Defines how dark is the "room"
  */
 
 export default function ReactFlashlight(props) {
 
   const {
+    enabled,
     children,
     showCursor,
-    initialSize,
+    size,
     initialPosition,
     moveTo,
     speed,
-    contain,
     enableMouse,
-    wheelResize,
     darkness,
   } = props;
 
@@ -35,8 +33,8 @@ export default function ReactFlashlight(props) {
     position: "absolute",
     top: 0,
     left: 0,
-    // To control the size of the light, simply use a percentage on the background creating the effect - init with initialSize
-    background: returnBackground(darkness, initialSize),
+    // To control the size of the light, simply use a percentage on the background creating the effect - init with size
+    background: "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "px, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)",
     transition: "none",
     pointerEvents: "none",
   }
@@ -44,9 +42,10 @@ export default function ReactFlashlight(props) {
   const lightRef = React.useRef();
   const containerRef = React.useRef();
 
-  function returnBackground(darkness, size) {
-    return "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "px, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)"
-  }
+  const elements = children.map(()=> ({
+    light: React.useRef(),
+    container: React.useRef(),
+  }));
 
   /**
    * Here I add event handlers for wheel, mouseMove and resize
@@ -54,63 +53,94 @@ export default function ReactFlashlight(props) {
 
   React.useEffect(()=>{
 
-    let size = initialSize;
-    
-    const light = lightRef.current;
-    const container = containerRef.current;
-    container.style.overflow = "hidden";
-    container.style.position = "relative";
-    container.style.cursor = showCursor ? "default" : "none";
+    elements.forEach(element => {
+      const container = element.container.current;
+      container.style.overflow = "hidden";
+      container.style.position = "relative";
+      if (!showCursor) container.style.cursor = "none";
+    })
 
     // Resizes the light
 
-    function resizeLight() {
-      const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
+    function resizeLight(element) {
+      if (element) {
+        const light = element.light.current;
+        const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
 
-      light.style.width = maskSize * 2 + "px";
-      light.style.height = maskSize * 2 + "px";
+        light.style.width = maskSize * 2 + "px";
+        light.style.height = maskSize * 2 + "px";
+    
+        light.style.left = initialPosition.x - maskSize + "px";
+        light.style.top = initialPosition.y - maskSize + "px";
+      } else {
+        elements.forEach(element => {
+          const light = element.light.current;
+          const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
   
-      light.style.left = initialPosition.x - maskSize + "px";
-      light.style.top = initialPosition.y - maskSize + "px";
+          light.style.width = maskSize * 2 + "px";
+          light.style.height = maskSize * 2 + "px";
+      
+          light.style.left = initialPosition.x - maskSize + "px";
+          light.style.top = initialPosition.y - maskSize + "px";
+        })
+      }
     }
 
     function handleMouseMove(e) {
-      const lightStyle = window.getComputedStyle(light, null);
-      const containerStyle = container.getBoundingClientRect();
-      light.style.transition = "none";
-      light.style.top = e.clientY - containerStyle.top - parseInt(lightStyle.height) / 2 + "px";
-      light.style.left = e.clientX - containerStyle.left - parseInt(lightStyle.width) / 2 + "px";
+      elements.forEach(element => {
+        const light = element.light.current;
+        const container = element.container.current;
+        const lightStyle = window.getComputedStyle(light, null);
+        const containerStyle = container.getBoundingClientRect();
+        light.style.transition = "opacity ease-in-out " + speed + "ms";
+        light.style.left = e.clientX - containerStyle.left - parseInt(lightStyle.width) / 2 + "px";
+        light.style.top = e.clientY - containerStyle.top - parseInt(lightStyle.height) / 2 + "px";
+      })
+
     }
 
-    function handleWheel(e) {
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        size += 10;
-      } else if (e.deltaY > 0) {
-        if (size > 0) size -= 10;
+    let last_known_scroll_position = 0;
+    let ticking = false;
+
+    function handleScroll(e) {
+      let increment = window.scrollY - last_known_scroll_position;
+      last_known_scroll_position = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          ticking = false;
+          elements.forEach(element => {
+            const light = element.light.current;
+            light.style.transition = "opacity ease-in-out " + speed + "ms";
+            light.style.top = parseInt(light.style.top) + increment + "px";
+          })
+        });
+        ticking = true;
       }
-      light.style.background = returnBackground(darkness, size);
     }
 
     resizeLight();
 
-    const resizeObserver = new ResizeObserver(()=>resizeLight());
+    const resizeObservers = [children.length];
 
-    resizeObserver.observe(container);
+    elements.forEach((element, i) => {
+      resizeObservers[i] = new ResizeObserver(()=>resizeLight(element));
+    });
 
+    if (enableMouse) window.addEventListener("mousemove", handleMouseMove);
+    if (enableMouse) window.addEventListener('scroll', handleScroll);
     window.addEventListener("resize", resizeLight);
-    if (enableMouse && contain) container.addEventListener("mousemove", handleMouseMove);
-    if (enableMouse && !contain) window.addEventListener("mousemove", handleMouseMove);
-    if (wheelResize) container.addEventListener("wheel", handleWheel, {passive: false});
+    elements.forEach((element, i) => {
+      resizeObservers[i].observe(element.container.current);
+    });
 
     // Cleanup
     return ()=>{
-      if (wheelResize) container.removeEventListener("mousemove", handleMouseMove);
-      if (enableMouse && contain) container.removeEventListener("wheel", handleWheel);
-      if (enableMouse && !contain) window.removeEventListener("wheel", handleWheel);
+      if (enableMouse) window.removeEventListener("mousemove", handleMouseMove);
+      if (enableMouse) window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", resizeLight)
-      resizeObserver.unobserve(container);
-      resizeObserver.disconnect();
+      elements.forEach((element, i) => {
+        resizeObservers[i].disconnect;
+      });
     }
 
   }, []);
@@ -140,17 +170,26 @@ export default function ReactFlashlight(props) {
     }
   }, [moveTo])
 
+  React.useEffect(()=>{
+    elements.forEach(element => {
+      const light = element.light.current;
+      light.style.transition = "opacity ease-in-out " + speed + "ms";
+      enabled ? light.style.opacity = "1" : light.style.opacity = "0";
+    });
+
+  }, [enabled])
+
   return ( 
-    React.Children.map(children, child =>
+    React.Children.map(children, (child, i) =>
       React.cloneElement(child,
         {
-          ref: containerRef,
+          ref: elements[i].container,
           children:
             <>
               <div
                 data-testid="react-flashlight"
                 style={lightStyle}
-                ref={lightRef}
+                ref={elements[i].light}
               />
               {child.props.children}
             </>
@@ -160,9 +199,10 @@ export default function ReactFlashlight(props) {
 }
 
 ReactFlashlight.propTypes = {
+  enabled: PropTypes.bool,
   children: PropTypes.element,
   showCursor: PropTypes.bool,
-  initialSize: PropTypes.number,
+  size: PropTypes.number,
   initialPosition: PropTypes.shape({
     x: PropTypes.number,
     y: PropTypes.number,
@@ -171,19 +211,17 @@ ReactFlashlight.propTypes = {
   speed: PropTypes.number,
   contain: PropTypes.bool,
   enableMouse: PropTypes.bool,
-  wheelResize: PropTypes.bool,
   darkness: PropTypes.number,
 }
 
 ReactFlashlight.defaultProps = {
+  enabled: true,
   children: <div></div>,
   showCursor: false,
-  initialSize: 50,
+  size: 150,
   initialPosition: {x: 0, y: 0},
   moveTo: null,
   speed: 1000,
-  contain: true,
   enableMouse: true,
-  wheelResize: true,
   darkness: 0.9,
 } 
