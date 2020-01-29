@@ -27,7 +27,7 @@ export default function ReactFlashlight(props) {
     speed,
     enableMouse,
     darkness,
-  } = props;
+  } = props; 
 
   const lightStyle = {
     position: "absolute",
@@ -37,21 +37,18 @@ export default function ReactFlashlight(props) {
     background: "radial-gradient(transparent 0%, rgba(0, 0, 0, " + darkness + ") " + size + "px, rgba(0, 0, 0, " + (darkness + 0.1) + ") 80%)",
     transition: "none",
     pointerEvents: "none",
+    willChange: "transform"
   }
 
-  const lightRef = React.useRef();
-  const containerRef = React.useRef();
-
-  const elements = children.map(()=> ({
+  const elements = React.Children.map(children, child => ({
     light: React.useRef(),
     container: React.useRef(),
-  }));
-
-  /**
-   * Here I add event handlers for wheel, mouseMove and resize
-   */
+  }))
 
   React.useEffect(()=>{
+
+    let last_known_scroll_position = 0;
+    let ticking = false;
 
     elements.forEach(element => {
       const container = element.container.current;
@@ -62,45 +59,40 @@ export default function ReactFlashlight(props) {
 
     // Resizes the light
 
-    function resizeLight(element) {
-      if (element) {
-        const light = element.light.current;
-        const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
+    function resizeLights() {
+      elements.forEach(element => {
+        resizeLight(element);
+      })
+    }
 
-        light.style.width = maskSize * 2 + "px";
-        light.style.height = maskSize * 2 + "px";
-    
-        light.style.left = initialPosition.x - maskSize + "px";
-        light.style.top = initialPosition.y - maskSize + "px";
-      } else {
-        elements.forEach(element => {
-          const light = element.light.current;
-          const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
+    function resizeLight(element) {
+      const light = element.light.current;
+      const maskSize = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
+
+      light.style.width = maskSize * 2 + "px";
+      light.style.height = maskSize * 2 + "px";
   
-          light.style.width = maskSize * 2 + "px";
-          light.style.height = maskSize * 2 + "px";
-      
-          light.style.left = initialPosition.x - maskSize + "px";
-          light.style.top = initialPosition.y - maskSize + "px";
-        })
-      }
+      light.style.left = initialPosition.x - maskSize + "px";
+      light.style.top = initialPosition.y - maskSize + "px";
     }
 
     function handleMouseMove(e) {
-      elements.forEach(element => {
-        const light = element.light.current;
-        const container = element.container.current;
-        const lightStyle = window.getComputedStyle(light, null);
-        const containerStyle = container.getBoundingClientRect();
-        light.style.transition = "opacity ease-in-out " + speed + "ms";
-        light.style.left = e.clientX - containerStyle.left - parseInt(lightStyle.width) / 2 + "px";
-        light.style.top = e.clientY - containerStyle.top - parseInt(lightStyle.height) / 2 + "px";
-      })
-
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          ticking = false;
+          elements.forEach(element => {
+            const light = element.light.current;
+            const container = element.container.current;
+            const lightStyle = window.getComputedStyle(light, null);
+            const containerStyle = container.getBoundingClientRect();
+            light.style.transition = "opacity ease-in-out " + speed + "ms";
+            light.style.left = e.clientX - containerStyle.left - parseInt(lightStyle.width) / 2 + "px";
+            light.style.top = e.clientY - containerStyle.top - parseInt(lightStyle.height) / 2 + "px";
+          })
+        });
+        ticking = true;
+      }
     }
-
-    let last_known_scroll_position = 0;
-    let ticking = false;
 
     function handleScroll(e) {
       let increment = window.scrollY - last_known_scroll_position;
@@ -118,17 +110,17 @@ export default function ReactFlashlight(props) {
       }
     }
 
-    resizeLight();
+    resizeLights();
 
     const resizeObservers = [children.length];
 
     elements.forEach((element, i) => {
-      resizeObservers[i] = new ResizeObserver(()=>resizeLight(element));
+      resizeObservers[i] = new ResizeObserver(()=>resizeLights());
     });
 
     if (enableMouse) window.addEventListener("mousemove", handleMouseMove);
     if (enableMouse) window.addEventListener('scroll', handleScroll);
-    window.addEventListener("resize", resizeLight);
+    window.addEventListener("resize", resizeLights);
     elements.forEach((element, i) => {
       resizeObservers[i].observe(element.container.current);
     });
@@ -137,7 +129,7 @@ export default function ReactFlashlight(props) {
     return ()=>{
       if (enableMouse) window.removeEventListener("mousemove", handleMouseMove);
       if (enableMouse) window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", resizeLight)
+      window.removeEventListener("resize", resizeLights)
       elements.forEach((element, i) => {
         resizeObservers[i].disconnect;
       });
@@ -152,21 +144,13 @@ export default function ReactFlashlight(props) {
   React.useEffect(()=>{
 
     if (moveTo) {
-      const light = lightRef.current;
-      const container = containerRef.current;
-  
-      light.style.transition = "all ease-in-out " + speed + "ms";
-  
-      const lightStyle = window.getComputedStyle(light, null);
-      const containerStyle = window.getComputedStyle(container, null); //container.getBoundingClientRect();
-
-      if (moveTo.x > parseInt(containerStyle.width)) moveTo.x = parseInt(containerStyle.width);
-      if (moveTo.y > parseInt(containerStyle.height)) moveTo.y = parseInt(containerStyle.height);
-      if (moveTo.x < 0) moveTo.x = 0;
-      if (moveTo.y < 0) moveTo.y = 0;
-  
-      light.style.left = moveTo.x - parseInt(lightStyle.width) / 2 + "px";
-      light.style.top = moveTo.y - parseInt(lightStyle.height) / 2 + "px";
+      elements.forEach(element => {
+        const light = element.light.current;
+        light.style.transition = "all ease-in-out " + speed + "ms";
+        const lightStyle = window.getComputedStyle(light, null);
+        light.style.left = moveTo.x - parseInt(lightStyle.width) / 2 + "px";
+        light.style.top = moveTo.y - parseInt(lightStyle.height) / 2 + "px";
+      })
     }
   }, [moveTo])
 
