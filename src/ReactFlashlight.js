@@ -184,7 +184,7 @@ export default function ReactFlashlight(props) {
 
 ReactFlashlight.propTypes = {
   enabled: PropTypes.bool,
-  children: PropTypes.element,
+  children: PropTypes.node,
   showCursor: PropTypes.bool,
   size: PropTypes.number,
   initialPosition: PropTypes.shape({
