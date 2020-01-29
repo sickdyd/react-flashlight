@@ -57,41 +57,25 @@ export default App;
 
 #### `<ReactFlashlight>` Props:
 
-  children: <div></div>,
-  showCursor: false,
-  initialSize: 50,
-  initialPosition: {x: 0, y: 0},
-  moveTo: null,
-  speed: 1000,
-  contain: true,
-  enableMouse: true,
-  wheelResize: true,
-  darkness: 0.9,
-
 ```js
 //
 // Props:
 //
 {
-  // Provide a child to which apply the effect
-  // Accepts only one child, defaults to <div></div>
-  children
+  // If true, the flashlight effect will be active (by default)
+  enabled
   // Show or hide the cursor, defaults to false
   showCursor
-  // Set initial light size, defaults to 50px
-  initialSize
+  // Set the light size, defaults to 150px
+  size
   // Set initial position, defaults to 0, 0
   initialPosition
   // Move programmatically the light to a location {x: value, y: value}
   moveTo
   // The speed of the movement transition, defaults to 1000ms
   speed
-  // If true, the light won't be able to move out of the container
-  contain
   // Let the user control the light with the mouse, defaults to true
   enableMouse
-  // Allow the user to resize the light with the mouse wheel, defaults to true
-  wheelResize
   // The "room" darkness (opacity), defaults to 0.9
   darkness
 }
